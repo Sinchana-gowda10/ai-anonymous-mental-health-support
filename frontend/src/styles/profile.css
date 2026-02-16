@@ -1,0 +1,110 @@
+.profile-container {
+  max-width: 900px;
+  margin: auto;
+  padding: 30px 20px;
+}
+
+/* Header */
+.profile-header {
+  margin-bottom: 20px;
+}
+
+.page-title {
+  font-size: 1.8rem;
+  color: #5f6caf;
+  margin-top: 4px;
+}
+
+/* Back */
+.back-link {
+  color: #6b8cff;
+  cursor: pointer;
+  margin-bottom: 25px;
+  font-size: 0.95rem;
+}
+
+/* Profile Card */
+.profile-card {
+  background: linear-gradient(135deg, #eef2ff, #fff5f8);
+  padding: 30px;
+  border-radius: 24px;
+  margin-bottom: 35px;
+}
+
+.profile-main {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.profile-avatar {
+  font-size: 3rem;
+}
+
+.profile-role {
+  color: #777;
+  margin-bottom: 6px;
+}
+
+.profile-description {
+  line-height: 1.6;
+  color: #333;
+}
+
+/* Sections */
+.profile-section {
+  margin-bottom: 30px;
+}
+
+.profile-section h4 {
+  margin-bottom: 12px;
+  color: #444;
+}
+
+/* Expertise */
+.expertise-tags {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.expertise-tags span {
+  background: #f0f4ff;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: #5f6caf;
+}
+
+/* Session */
+.session-details p {
+  margin: 6px 0;
+  color: #444;
+}
+
+/* CTA */
+.start-session-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #6b8cff, #ff8fa3);
+  color: white;
+  border: none;
+  padding: 16px;
+  border-radius: 32px;
+  font-size: 1.05rem;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(107, 140, 255, 0.35);
+  transition: all 0.2s ease;
+}
+
+.start-session-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* Privacy */
+.privacy-note {
+  font-size: 0.85rem;
+  color: #777;
+  text-align: center;
+  margin-top: 25px;
+}

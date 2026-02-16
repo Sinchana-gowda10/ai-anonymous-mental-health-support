@@ -1,0 +1,145 @@
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: linear-gradient(180deg, #eef2ff, #ffffff, #fdf6ff);
+  color: #2c2c2c;
+}
+
+
+/* Container */
+.landing-container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 30px 20px;
+}
+
+/* Brand Header */
+.brand-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 50px;
+}
+
+.logo {
+  font-size: 2.2rem;
+}
+.brand-name {
+  font-size: 1.9rem;
+  font-weight: 600;
+  color: #5f6caf;
+}
+
+.brand-name span {
+  color: #ff8fa3; /* soft coral */
+}
+
+/* Hero */
+.hero {
+  background: linear-gradient(
+    135deg,
+    #e8f0ff,
+    #fff0f5,
+    #eafff6
+  );
+  padding: 55px 35px;
+  border-radius: 24px;
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.hero h2 {
+  font-size: 2.2rem;
+  margin-bottom: 15px;
+}
+
+.hero p {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 30px;
+}
+
+/* Button */
+.primary-btn {
+  background: linear-gradient(135deg, #ff8fa3, #6b8cff);
+  color: white;
+  border: none;
+  padding: 14px 36px;
+  border-radius: 30px;
+  font-size: 1.05rem;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(255, 143, 163, 0.35);
+  transition: all 0.2s ease;
+}
+
+.primary-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(107, 140, 255, 0.35);
+}
+
+
+/* How it works */
+.how-it-works {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.how-it-works h3 {
+  font-size: 1.6rem;
+  margin-bottom: 30px;
+}
+.cards {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 24px;
+  margin-top: 30px;
+  flex-wrap: nowrap;
+}
+
+.card {
+  flex: 1;
+  background: linear-gradient(180deg, #ffffff, #f8faff);
+  padding: 28px 24px;
+  border-radius: 20px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.07);
+  text-align: center;
+}
+
+.card span {
+  font-size: 1.8rem;
+}
+
+.card h4 {
+  margin: 12px 0 8px;
+  color: #5f6caf;
+}
+
+/* Support types */
+.support-types {
+  background: linear-gradient(135deg, #f0f7ff, #fdf0f7);
+  padding: 45px;
+  border-radius: 20px;
+  margin-bottom: 50px;
+}
+
+.support-types h3 {
+  margin-bottom: 20px;
+}
+.support-types ul {
+  list-style: none;
+  padding: 0;
+}
+
+.support-types li {
+  font-size: 1.05rem;
+  margin: 10px 0;
+}
+
+
+/* Footer */
+.footer {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #777;
+}
