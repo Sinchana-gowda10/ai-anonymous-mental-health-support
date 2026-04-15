@@ -1,6 +1,8 @@
 from sqlalchemy import Column, String, TIMESTAMP, Integer,Text, ForeignKey
 from datetime import datetime
 from app.database import Base
+from sqlalchemy import Column, Integer, String, DateTime
+from datetime import datetime
 
 
 class User(Base):
@@ -37,5 +39,25 @@ class CommunityReply(Base):
     user_id = Column(String(50), ForeignKey("users.user_id"))
     content = Column(Text)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)
+
+class Professional(Base):
+    __tablename__ = "professionals"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100))
+    specialization = Column(String(100))
+    experience = Column(String(50))
+
+class SessionModel(Base):
+    __tablename__ = "sessions"
+
+    session_id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String(100))
+    professional_id = Column(Integer)
+
+    status = Column(String(50), default="active")  # active / ended
+
+    start_time = Column(DateTime, default=datetime.utcnow)
+    end_time = Column(DateTime, nullable=True)
 
 

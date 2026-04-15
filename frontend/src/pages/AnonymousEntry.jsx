@@ -4,6 +4,27 @@ import { useNavigate } from "react-router-dom";
 function AnonymousEntry() {
   const navigate = useNavigate();
 
+  const handleAnonymousEntry = async () => {
+  try {
+    const res = await fetch("http://127.0.0.1:8000/create-anonymous-user", {
+      method: "POST",
+    });
+
+    const data = await res.json();
+
+    // 🔥 Store user ID
+    localStorage.setItem("user_id", data.user_id);
+
+    console.log("User created:", data.user_id);
+
+    // Navigate after storing
+    navigate("/ai-support");
+
+  } catch (error) {
+    console.error("Error creating user:", error);
+  }
+};
+
   return (
     <div className="entry-container">
       
@@ -42,10 +63,10 @@ function AnonymousEntry() {
           </div>
         </div>
 
-        {/* ✅ NAVIGATION ADDED HERE */}
+        {/* Button */}
         <button
           className="primary-btn full-width"
-          onClick={() => navigate("/ai-support")}
+          onClick={handleAnonymousEntry}
         >
           Continue Anonymously
         </button>

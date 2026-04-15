@@ -1,17 +1,23 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.database import engine, SessionLocal, Base
-from app.models import User
-import uuid
-from app.chatbot import generate_bot_reply
-from app.models import ChatMessage, CommunityPost, CommunityReply
 from fastapi.middleware.cors import CORSMiddleware
-from app.schemas import ChatRequest
+
+from app.database import engine, Base, get_db
+from app.models import User, ChatMessage, CommunityPost, CommunityReply, Professional, SessionModel
+from app.schemas import ChatRequest, OrderRequest, StartSessionRequest, EndSessionRequest
+
+import uuid
+import os
+import razorpay
+import hmac
+import hashlib
+from datetime import datetime
+from pydantic import BaseModel
 
 
+# -------------------- APP INIT --------------------
 
 app = FastAPI(title="AI Anonymous Support Platform")
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,21 +29,39 @@ app.add_middleware(
 
 Base.metadata.create_all(bind=engine)
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+
+# -------------------- RAZORPAY SETUP --------------------
+
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
+
+razorpay_client = razorpay.Client(
+    auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET)
+)
+
+
+# -------------------- SCHEMAS --------------------
+
+class VerifyPaymentRequest(BaseModel):
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+
+
+# -------------------- BASIC ROUTES --------------------
 
 @app.get("/")
 def home():
-    return {"status": "Backend connected to MySQL successfully"}
+    return {"status": "Backend connected successfully"}
+
 
 @app.get("/test-db")
 def test_db(db: Session = Depends(get_db)):
     users = db.query(User).all()
     return {"users_count": len(users)}
+
+
+# -------------------- USER --------------------
 
 @app.post("/create-anonymous-user")
 def create_anonymous_user(db: Session = Depends(get_db)):
@@ -54,12 +78,18 @@ def create_anonymous_user(db: Session = Depends(get_db)):
     db.refresh(new_user)
 
     return {
-        "message": "Anonymous user created successfully",
+        "message": "Anonymous user created",
         "user_id": anonymous_id
     }
+
+
+# -------------------- CHAT --------------------
+
+from app.chatbot import generate_bot_reply
+
 @app.post("/chat")
 def chat(request: ChatRequest, db: Session = Depends(get_db)):
-    # Save user message
+
     user_chat = ChatMessage(
         user_id=request.user_id,
         sender="user",
@@ -68,10 +98,8 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
     db.add(user_chat)
     db.commit()
 
-    # Generate bot reply
     bot_reply = generate_bot_reply(request.message)
 
-    # Save bot reply
     bot_chat = ChatMessage(
         user_id=request.user_id,
         sender="ai",
@@ -80,23 +108,20 @@ def chat(request: ChatRequest, db: Session = Depends(get_db)):
     db.add(bot_chat)
     db.commit()
 
-    return {
-        "bot_reply": bot_reply
-    }
+    return {"bot_reply": bot_reply}
+
+
+# -------------------- COMMUNITY --------------------
+
 @app.post("/community/post")
 def create_post(user_id: str, content: str, db: Session = Depends(get_db)):
-    post = CommunityPost(
-        user_id=user_id,
-        content=content
-    )
+    post = CommunityPost(user_id=user_id, content=content)
     db.add(post)
     db.commit()
     db.refresh(post)
 
-    return {
-        "message": "Post created successfully",
-        "post_id": post.post_id
-    }
+    return {"message": "Post created", "post_id": post.post_id}
+
 
 @app.get("/community/posts")
 def get_posts(db: Session = Depends(get_db)):
@@ -111,17 +136,109 @@ def get_posts(db: Session = Depends(get_db)):
         for post in posts
     ]
 
+
 @app.post("/community/reply")
 def reply_to_post(post_id: int, user_id: str, content: str, db: Session = Depends(get_db)):
-    reply = CommunityReply(
-        post_id=post_id,
-        user_id=user_id,
-        content=content
-    )
+    reply = CommunityReply(post_id=post_id, user_id=user_id, content=content)
     db.add(reply)
     db.commit()
 
-    return {"message": "Reply added successfully"}
+    return {"message": "Reply added"}
 
 
+# -------------------- PROFESSIONALS --------------------
 
+@app.get("/professionals")
+def get_professionals(db: Session = Depends(get_db)):
+    return db.query(Professional).all()
+
+
+# -------------------- PAYMENT --------------------
+
+@app.post("/create-order")
+def create_order(data: OrderRequest):
+
+    try:
+        amount = 50000  # ₹500
+
+        order = razorpay_client.order.create({
+            "amount": amount,
+            "currency": "INR",
+            "payment_capture": 1
+        })
+
+        return {
+            "order_id": order["id"],
+            "amount": amount,
+            "currency": "INR",
+            "key": RAZORPAY_KEY_ID
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/verify-payment")
+def verify_payment(data: VerifyPaymentRequest):
+
+    generated_signature = hmac.new(
+        bytes(RAZORPAY_KEY_SECRET, 'utf-8'),
+        bytes(data.razorpay_order_id + "|" + data.razorpay_payment_id, 'utf-8'),
+        hashlib.sha256
+    ).hexdigest()
+
+    if generated_signature == data.razorpay_signature:
+        return {"status": "Payment verified"}
+
+    else:
+        raise HTTPException(status_code=400, detail="Invalid signature")
+
+
+# -------------------- SESSION --------------------
+
+@app.post("/start-session")
+def start_session(data: StartSessionRequest, db: Session = Depends(get_db)):
+
+    session = SessionModel(
+        user_id=data.user_id,
+        professional_id=data.professional_id,
+        status="active",
+        start_time=datetime.utcnow()
+    )
+
+    db.add(session)
+    db.commit()
+    db.refresh(session)
+
+    return {
+        "message": "Session started",
+        "session_id": session.session_id
+    }
+
+@app.post("/end-session")
+def end_session(data: EndSessionRequest, db: Session = Depends(get_db)):
+
+    session = db.query(SessionModel).filter(
+        SessionModel.session_id == data.session_id
+    ).first()
+
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    # Set end time
+    session.end_time = datetime.utcnow()
+    session.status = "ended"
+
+    # Calculate duration (in minutes)
+    duration = (session.end_time - session.start_time).total_seconds() / 60
+
+    # Billing (₹50 per minute)
+    cost = round(duration * 50, 2)
+
+    db.commit()
+
+    return {
+        "message": "Session ended",
+        "duration_minutes": round(duration, 2),
+        "total_cost": cost
+    }

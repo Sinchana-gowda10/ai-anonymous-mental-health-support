@@ -1,6 +1,35 @@
 import "../styles/profile.css";
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 function ProfessionalProfile() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [professional, setProfessional] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfessional = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/professionals`);
+        const data = await res.json();
+
+        const selected = data.find((p) => p.id === parseInt(id));
+        setProfessional(selected);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfessional();
+  }, [id]);
+
+  if (loading) return <p>Loading...</p>;
+  if (!professional) return <p>Professional not found</p>;
+
   return (
     <div className="profile-container">
 
@@ -17,7 +46,9 @@ function ProfessionalProfile() {
       </header>
 
       {/* Back */}
-      <p className="back-link">← Back to professionals</p>
+      <p className="back-link" onClick={() => navigate("/professionals")}>
+        ← Back to professionals
+      </p>
 
       {/* Profile Card */}
       <div className="profile-card">
@@ -25,33 +56,30 @@ function ProfessionalProfile() {
         <div className="profile-main">
           <div className="profile-avatar">👩‍⚕️</div>
           <div>
-            <h3>Dr. A. Sharma</h3>
-            <p className="profile-role">Clinical Psychologist</p>
+            <h3>{professional.name}</h3>
+            <p className="profile-role">{professional.specialization}</p>
             <span className="verified-badge">✔ Licensed & Verified</span>
           </div>
         </div>
 
         <p className="profile-description">
-          Dr. Sharma is a licensed clinical psychologist with over 8 years of
-          experience supporting individuals dealing with anxiety, depression,
-          and emotional stress. Her approach focuses on empathy, clarity, and
-          evidence-based care.
+          This professional has {professional.experience} of experience helping individuals with mental health challenges.
         </p>
 
       </div>
 
-      {/* Expertise */}
+      {/* Expertise (Static for now) */}
       <section className="profile-section">
         <h4>Areas of Expertise</h4>
         <div className="expertise-tags">
           <span>Anxiety</span>
           <span>Depression</span>
-          <span>Stress Management</span>
+          <span>Stress</span>
           <span>Emotional Well-being</span>
         </div>
       </section>
 
-      {/* Session Details */}
+      {/* Session */}
       <section className="profile-section session-details">
         <h4>Session Details</h4>
         <p>💬 Text-based session</p>
@@ -60,14 +88,20 @@ function ProfessionalProfile() {
       </section>
 
       {/* CTA */}
-      <button className="start-session-btn">
-        Start Anonymous Session
-      </button>
+      <button
+  className="start-session-btn"
+  onClick={() =>
+    navigate("/payment", {
+      state: { professional },
+    })
+  }
+>
+  Start Anonymous Session
+</button>
 
-      {/* Privacy Note */}
+      {/* Privacy */}
       <p className="privacy-note">
         Your identity remains anonymous. Sessions are private and encrypted.
-        You can end the session at any time.
       </p>
 
     </div>
