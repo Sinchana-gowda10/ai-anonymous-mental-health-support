@@ -349,6 +349,5 @@ Users experiencing severe mental health crises should contact professional healt
 Developed by:
 Sinchana
 
-Full Stack Developer | Cybersecurity Enthusiast | AI-based Mental Health Platform Project
+Full Stack Developer | AI-based Mental Health Platform Project
 
-Change to my name and give me and my profile
