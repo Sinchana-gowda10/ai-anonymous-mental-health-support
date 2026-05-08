@@ -21,13 +21,12 @@ app = FastAPI(title="AI Anonymous Support Platform")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-Base.metadata.create_all(bind=engine)
 
 
 # -------------------- RAZORPAY SETUP --------------------
